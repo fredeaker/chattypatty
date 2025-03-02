@@ -1,2 +1,2 @@
 # chattpatty
-Basic vanilla HTML and JavaScript implementation as the ChatGPT API
+Basic vanilla HTML and JavaScript implementation of the ChatGPT API.
