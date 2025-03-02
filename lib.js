@@ -68,7 +68,8 @@ class Controller {
 	}
 		
 	async getResponse() {
-		this.view.progress_bar.style.visibility = "visible";
+		this.view.progress_bar.style.display = "block";
+		this.view.submit_button.style.display = "none";
 		this.view.submit_button.disabled = true;
 		this.oai_response =
 			await fetch(this.oai_endpoint_url, { // begin fetch
@@ -86,7 +87,8 @@ class Controller {
 				})
 			}); // end fetch
 		
-		this.view.progress_bar.style.visibility = "hidden";
+		this.view.progress_bar.style.display = "none";
+		this.view.submit_button.style.display = "block";
 		this.view.submit_button.disabled = false;
 		
 		this.oai_response = await this.oai_response.json();
