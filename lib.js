@@ -1,10 +1,14 @@
 function submitPrompt() {
-	const v = new Form(); // view
+	const v = new Form(); // i.e., view
 	const c = new Controller(v);
 }
 
 class Form { // view
 	constructor() {
+		
+		// for each DOM element that will contain user input,
+		// get the element and then get the user input value
+		
 		this.oai_api_key = document.getElementById('oai_api_key');
 		this.oai_api_key_value = DOMPurify.sanitize(this.oai_api_key.value);
 		
@@ -14,11 +18,19 @@ class Form { // view
 		this.oai_api_prompt = document.getElementById('oai_api_prompt');
 		this.oai_api_prompt_value = this.oai_api_prompt.value;
 		
+		// get other DOM elements in the page for updating 
+		
 		this.submit_button = document.getElementById('submit_button');
 		this.progress_bar = document.getElementById('progress-bar');
 		this.oai_api_response = document.getElementById('oai_api_response');
-		this.debug = document.getElementById('debug');		
+		this.debug = document.getElementById('debug');
+		
+		// clear the debug element since user is entering a new prompt
+		
 		this.clearDebug();
+		
+		// form_ok supports error checking
+		
 		this.form_ok = true;
 		
 		DOMPurify.sanitize();
