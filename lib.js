@@ -22,12 +22,15 @@ class Form { // view
 		
 		this.submit_button = document.getElementById('submit_button');
 		this.progress_bar = document.getElementById('progress-bar');
+		this.copy_button = document.getElementById('copy_button');
 		this.oai_api_response = document.getElementById('oai_api_response');
 		this.debug = document.getElementById('debug');
 		
-		// clear the debug element since user is entering a new prompt
+		// hide the copy_response button and clear the debug element
+		// since user is entering a new prompt
 		
 		this.clearDebug();
+		this.copy_button.style.display = 'none';
 		
 		// form_ok supports error checking
 		
@@ -87,8 +90,9 @@ class Controller {
 				})
 			}); // end fetch
 		
-		this.view.progress_bar.style.display = "none";
-		this.view.submit_button.style.display = "block";
+		this.view.progress_bar.style.display = 'none';
+		this.view.submit_button.style.display = 'block';
+		this.view.copy_button.style.display = 'block';
 		this.view.submit_button.disabled = false;
 		
 		this.oai_response = await this.oai_response.json();
@@ -98,4 +102,16 @@ class Controller {
 		
 		console.log("this.response:\n" + JSON.stringify(this.oai_response)); // debug
 	}
+}
+
+function copyResponse() {
+	// Get the text field
+	this.oai_api_response = document.getElementById("oai_api_response");
+
+	// Select the text field
+	this.oai_api_response.select();
+	this.oai_api_response.setSelectionRange(0, 99999); // For mobile devices
+
+	// Copy the text inside the text field
+	navigator.clipboard.writeText(this.oai_api_response.value);
 }
