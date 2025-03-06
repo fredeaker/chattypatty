@@ -32,7 +32,20 @@
 						<input type="password" name="oai_api_key" class="form-control" id="oai_api_key" value="">
 						<label for="oai_api_model">OpenAI API Model</label>
 						<input type="text" name="oai_api_model" class="form-control" id="oai_api_model" readonly value="gpt-4o">
-					</div>
+						<label for="persona-select">Select persona (optional)</label>
+						<select class="form-select" aria-label="Select persona (optional)" name="persona-select" id="persona-select">
+							<option value='none' selected>None</option>
+							<option value='smg'>Social Media Guru</option>
+							<option value='cwc'>Creative Writing Coach</option>
+							<option value="biz">Senior Business Consultant</option>
+							<option value="swd">Senior Software Developer Mentor</option>
+							<option value="home">Home Improvement Advisor</option>
+							<option value="phi">Wise Philosopher</option>
+							<option value="self">Self-Improvement Coach</option>
+						</select>
+					</div>					
+
+				
 			</div>
 			
 			<div class="row"> <!-- input section -->
