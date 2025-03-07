@@ -18,6 +18,9 @@ class Form { // view
 		this.oai_api_prompt = document.getElementById('oai_api_prompt');
 		this.oai_api_prompt_value = this.oai_api_prompt.value;
 		
+		this.persona_select = document.getElementById('persona_select');
+		this.persona_select_value = this.persona_select.value;
+
 		// get other DOM elements in the page for updating 
 		
 		this.submit_button = document.getElementById('submit_button');
@@ -69,11 +72,12 @@ class Controller {
 		this.oai_endpoint_url = "https://api.openai.com/v1/chat/completions";
 		if (this.view.form_ok) {this.getResponse();}
 	}
-		
+	
 	async getResponse() {
 		this.view.progress_bar.style.display = "block";
 		this.view.submit_button.style.display = "none";
 		this.view.submit_button.disabled = true;
+		
 		this.oai_response =
 			await fetch(this.oai_endpoint_url, { // begin fetch
 				method: 'POST',
@@ -84,8 +88,22 @@ class Controller {
 				body: JSON.stringify({
 					'model': this.view.oai_api_model.value,
 					'messages': [
-						//{"role":"system", "content": "You are a helpful assistant."},
-						{"role":"user", "content": this.view.oai_api_prompt_value}
+						{
+							"role":"developer",
+							"content": [
+								{
+									'type': 'text',
+									'text': this.view.persona_select_value
+								}]
+						},
+						{
+							"role":"user",
+							"content": [
+								{
+									'type': 'text',
+									this.view.oai_api_prompt_value}
+							]
+						}
 					]
 				})
 			}); // end fetch
