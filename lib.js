@@ -92,16 +92,17 @@ class Controller {
 							"role":"developer",
 							"content": [
 								{
-									'type': 'text',
-									'text': this.view.persona_select_value
+									"type": "text",
+									"text": this.view.persona_select_value
 								}]
 						},
 						{
-							"role":"user",
+							"role": "user",
 							"content": [
 								{
-									'type': 'text',
-									this.view.oai_api_prompt_value}
+									"type": "text",
+									"text": this.view.oai_api_prompt_value
+								}
 							]
 						}
 					]
