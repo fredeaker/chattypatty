@@ -118,10 +118,13 @@ class Controller {
 		this.oai_content = this.oai_response.choices[0].message.content;
 		
 		// parse Markdown response to HTML
-		oai_api_response.insertAdjacentHTML("afterbegin", marked.parse(this.oai_content));
-		//this.view.oai_api_response.value = marked.parse(this.oai_content);
+		this.view.oai_api_response.insertAdjacentHTML("afterbegin", marked.parse(this.oai_content));
+		// this.view.oai_api_response.insertAdjacentHTML("afterbegin", this.oai_content); // debug
+		// this.view.oai_api_response.insertAdjacentHTML("afterbegin", "DEBUG"); // debug
+		// this.view.oai_api_response.value = this.oai_content; // debug
 		
 		console.log("this.response:\n" + JSON.stringify(this.oai_response)); // debug
+		console.log("this.oai_content:\n" + this.oai_content); // debug
 	}
 }
 
@@ -130,10 +133,10 @@ function copyResponse() {
 	this.oai_api_response = document.getElementById("oai_api_response");
 
 	// Select the text field
-	//this.oai_api_response.select();
-	//this.oai_api_response.setSelectionRange(0, 99999); // For mobile devices
+	// this.oai_api_response.select();
+	// this.oai_api_response.setSelectionRange(0, 99999); // For mobile devices
 
 	// Copy the text inside the text field
-	//navigator.clipboard.writeText(this.oai_api_response.value);
+	// navigator.clipboard.writeText(this.oai_api_response.value);
 	navigator.clipboard.writeText(this.oai_api_response.innerText);
 }
