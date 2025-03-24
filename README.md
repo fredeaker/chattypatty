@@ -8,6 +8,7 @@ Production implementation here: [fredeaker.com/chattypatty/](https://fredeaker.c
 
 - [marked](https://github.com/markedjs/marked)
 - [DOMPurify](https://github.com/cure53/DOMPurify)
+- [bootswatch](https://github.com/thomaspark/bootswatch) / [bootstrap](https://github.com/twbs/bootstrap)
 
 # Roadmap
 
