@@ -32,7 +32,7 @@ class Form { // view
 		// hide the copy_response button and clear the debug element
 		// since user is entering a new prompt
 		
-		this.clearDebug();
+		clearDebug();
 		this.copy_button.style.display = 'none';
 		
 		// form_ok supports error checking
@@ -42,28 +42,28 @@ class Form { // view
 		DOMPurify.sanitize();
 		
 		if (!this.oai_api_key_value) { // no api key
-			this.addDebug("ERROR: No API Key.");
+			/*this.*/ addDebug("ERROR: No API Key.");
 			this.form_ok = false;
 		}
 		
 		if (!this.oai_api_model_value) { // no model
-			this.addDebug("ERROR: No Model.");
+			/*this.*/ addDebug("ERROR: No Model.");
 			this.form_ok = false;
 		}
 		
 		if (!this.oai_api_prompt_value) { // no prompt
-			this.addDebug("ERROR: No prompt.");
+			/*this.*/ addDebug("ERROR: No prompt.");
 			this.form_ok = false;
 		}
 	}
 	
-	addDebug(debugMessage) {
-		const pre = document.createElement("pre");
-		pre.innerHTML = debugMessage;
-		this.debug.appendChild(pre);
-	}
+	//addDebug(debugMessage) {
+	//	const pre = document.createElement("pre");
+	//	pre.innerHTML = debugMessage;
+	//	this.debug.appendChild(pre);
+	//}
 
-	clearDebug() {this.debug.innerHTML = "";}
+	//clearDebug() {this.debug.innerHTML = "";}
 }
 
 class Controller {
@@ -77,6 +77,7 @@ class Controller {
 		this.view.progress_bar.style.display = "block";
 		this.view.submit_button.style.display = "none";
 		this.view.submit_button.disabled = true;
+		this.view.oai_api_response.innerHTML = "";
 		
 		this.oai_response =
 			await fetch(this.oai_endpoint_url, { // begin fetch
@@ -119,9 +120,6 @@ class Controller {
 		
 		// parse Markdown response to HTML
 		this.view.oai_api_response.insertAdjacentHTML("afterbegin", marked.parse(this.oai_content));
-		// this.view.oai_api_response.insertAdjacentHTML("afterbegin", this.oai_content); // debug
-		// this.view.oai_api_response.insertAdjacentHTML("afterbegin", "DEBUG"); // debug
-		// this.view.oai_api_response.value = this.oai_content; // debug
 		
 		console.log("this.response:\n" + JSON.stringify(this.oai_response)); // debug
 		console.log("this.oai_content:\n" + this.oai_content); // debug
@@ -139,4 +137,19 @@ function copyResponse() {
 	// Copy the text inside the text field
 	// navigator.clipboard.writeText(this.oai_api_response.value);
 	navigator.clipboard.writeText(this.oai_api_response.innerText);
+	addDebug("Response copied.");
+}
+
+function addDebug(debugMessage) {
+	this.debug = document.getElementById('debug');
+	const pre = document.createElement("pre");
+	now = new Date(Date.now()).toISOString();
+	//timestamp = now.getMonth() + '/' + now.getDate() + '/' + now.getYear + ' ' + now.getHours + ':' + now.getMinutes + ':' + now.getSeconds();
+	pre.innerHTML = now + ' - ' + debugMessage;
+	this.debug.appendChild(pre);
+}
+
+function clearDebug() {
+	this.debug = document.getElementById('debug');
+	this.debug.innerHTML = "";
 }
