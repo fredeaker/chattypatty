@@ -16,7 +16,7 @@ class Form { // view
 		this.oai_api_model_value = DOMPurify.sanitize(this.oai_api_model.value);
 		
 		this.oai_api_prompt = document.getElementById('oai_api_prompt');
-		this.oai_api_prompt_value = this.oai_api_prompt.value;
+		this.oai_api_prompt_value = DOMPurify.sanitize(this.oai_api_prompt.value);
 		
 		this.persona_select = document.getElementById('persona_select');
 		this.persona_select_value = this.persona_select.value;
