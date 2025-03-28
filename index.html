@@ -21,7 +21,7 @@
 		
 			<div class="row">
 				<div class="col-8">
-					<h1>chattypatty 3.2</h1>
+					<h1 class="display-3 text-primary">chattypatty</h1>
 					<p>Basic vanilla HTML and JavaScript implementation of the ChatGPT completions API, created by <a href='https://fredeaker.com/'>Fred Eaker</a> [<a href='https://github.com/fredeaker/chattypatty'>src</a>].</p>
 				</div>
 				
@@ -50,30 +50,34 @@
 				
 			</div>
 			
-			<div class="row"> <!-- input section -->
-				<div class="col">
-					<label for="oai_api_prompt"><h2>Prompt</h2></label>
-					<textarea class="form-control" id="oai_api_prompt" name="oai_api_prompt" rows="10"></textarea>
-					<!-- group of buttons -->
-					<div class="d-grid gap-2">
-						<button id="submit_button" type="submit" class="btn btn-primary" onclick="submitPrompt();">Submit</button>
-						<!-- progress bar -->
-						<button id="progress-bar" class="btn btn-info" type="button" disabled style="display:none">
-							<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
-							<span role="status">Inhale calmness, exhale stress while we process your request.</span>
-						</button>
-						<!-- copy response button -->
-						<button id="copy_button" type="button" class="btn btn-primary" style="display:none" onclick="copyResponse();">Copy response</button>
-					</div>
-				</div>
-			</div>
+			<nav>
+			  <div class="nav nav-tabs" id="nav-tab" role="tablist">
+				<button class="nav-link active" id="nav-basic-tab" data-bs-toggle="tab" data-bs-target="#nav-basic" type="button" role="tab" aria-controls="nav-basic" aria-selected="true">Basic Chat Completion</button>
+				<button class="nav-link" id="nav-responses-tab" data-bs-toggle="tab" data-bs-target="#nav-responses" type="button" role="tab" aria-controls="nav-responses" aria-selected="false">Responses</button>
+			  </div>
+			</nav>
 			
-			<div class="row"> <!-- output section -->
-				<div class="col">
+			<div class="tab-content" id="nav-tabContent">
+			  <div class="tab-pane fade show active" id="nav-basic" role="tabpanel" aria-labelledby="nav-basic-tab" tabindex="0">
+				<label for="oai_api_prompt"><h2>Prompt</h2></label>
+				<textarea class="form-control" id="oai_api_prompt" name="oai_api_prompt" rows="10"></textarea>
+				<!-- group of buttons -->
+				<div class="d-grid gap-2">
+					<button id="submit_button" type="submit" class="btn btn-primary" onclick="submitPrompt();">Submit</button>
+					<!-- progress bar -->
+					<button id="progress-bar" class="btn btn-info" type="button" disabled style="display:none">
+						<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+						<span role="status">Inhale calmness, exhale stress while we process your request.</span>
+					</button>
+					<!-- copy response button -->
+					<button id="copy_button" type="button" class="btn btn-primary" style="display:none" onclick="copyResponse();">Copy response</button>
+					<!-- Response Section -->
 					<h2>Response</h2>
 					<!-- <textarea class="form-control" id="oai_api_response" name="oai_api_response" rows="10" readonly></textarea>-->
 					<div id="oai_api_response" name="oai_api_response" class="text-bg-light p-3 border border-1"></div>
 				</div>
+			  </div>
+			  <div class="tab-pane fade" id="nav-responses" role="tabpanel" aria-labelledby="nav-responses-tab" tabindex="0">Responses coming soon ...</div>
 			</div>
 			
 			<div class="row"> <!-- debug section -->
