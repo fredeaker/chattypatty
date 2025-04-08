@@ -18,6 +18,8 @@ class Form { // view
 		this.oai_api_prompt = document.getElementById('oai_api_prompt');
 		this.oai_api_prompt_value = DOMPurify.sanitize(this.oai_api_prompt.value);
 		
+		this.toastContainer = document.getElementById('toast-container');
+		
 		this.persona_select = document.getElementById('persona_select');
 		this.persona_select_value = this.persona_select.value;
 
@@ -32,7 +34,7 @@ class Form { // view
 		// hide the copy_response button and clear the debug element
 		// since user is entering a new prompt
 		
-		clearDebug();
+		//clearDebug();
 		this.copy_button.style.display = 'none';
 		
 		// form_ok supports error checking
@@ -42,17 +44,17 @@ class Form { // view
 		DOMPurify.sanitize();
 		
 		if (!this.oai_api_key_value) { // no api key
-			/*this.*/ addDebug("ERROR: No API Key.");
+			/*this.*/ addDebug(this.toastContainer, "ERROR: No API Key.");
 			this.form_ok = false;
 		}
 		
 		if (!this.oai_api_model_value) { // no model
-			/*this.*/ addDebug("ERROR: No Model.");
+			/*this.*/ addDebug(this.toastContainer, "ERROR: No Model.");
 			this.form_ok = false;
 		}
 		
 		if (!this.oai_api_prompt_value) { // no prompt
-			/*this.*/ addDebug("ERROR: No prompt.");
+			/*this.*/ addDebug(this.toastContainer, "ERROR: No prompt.");
 			this.form_ok = false;
 		}
 	}
@@ -137,16 +139,103 @@ function copyResponse() {
 	// Copy the text inside the text field
 	// navigator.clipboard.writeText(this.oai_api_response.value);
 	navigator.clipboard.writeText(this.oai_api_response.innerText);
-	addDebug("Response copied.");
+	addDebug(document.getElementById('toast-container'), "Response copied.");
 }
 
-function addDebug(debugMessage) {
+function addDebug(toastContainer, debugMessage) {
+	/*
 	this.debug = document.getElementById('debug');
 	const pre = document.createElement("pre");
 	now = new Date(Date.now()).toISOString();
 	//timestamp = now.getMonth() + '/' + now.getDate() + '/' + now.getYear + ' ' + now.getHours + ':' + now.getMinutes + ':' + now.getSeconds();
 	pre.innerHTML = now + ' - ' + debugMessage;
 	this.debug.appendChild(pre);
+	*/
+	
+	// create and add toast to DOM
+	/* sample THML from https://getbootstrap.com/docs/5.3/components/toasts/
+	<div id="tbd" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+		<div class="toast-header">
+			<img src="..." class="rounded me-2" alt="...">
+			<strong class="me-auto">chattypatty</strong>
+			<small class="text-body-secondary">just now</small>
+			<button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+		</div>
+		<div class="toast-body">See? Just like this.</div>
+	</div>
+	*/
+	
+	const idTimestamp = new Date(Date.now()).toISOString();
+	
+	// <div id="tbd" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+	
+	const divToast = document.createElement("div");
+	divToast.setAttribute("id", idTimestamp);
+	divToast.setAttribute("class", "toast");
+	divToast.setAttribute("role", "alert");
+	divToast.setAttribute("aria-live", "assertive");
+	divToast.setAttribute("aria-atomic", "true");
+	
+	// <div class="toast-header">
+	
+	const divToastHeader = document.createElement("div");
+	divToastHeader.classList.add("toast-header");
+	
+	// <img src="..." class="rounded me-2" alt="...">
+	// skip for now
+	
+	// <strong class="me-auto">chattypatty</strong>
+	
+	const strongToastHeader = document.createElement("strong");
+	strongToastHeader.classList.add("me-auto");
+	
+	const nodechattypatty = document.createTextNode("chattpatty");
+	strongToastHeader.appendChild(nodechattypatty);
+	
+	divToastHeader.appendChild(strongToastHeader);
+	
+	// <small class="text-body-secondary">just now</small>
+	
+	const smallTimestamp = document.createElement("small");
+	smallTimestamp.classList.add("text-body-secondary");
+	
+	const nodeTimestamp = document.createTextNode(idTimestamp);
+	smallTimestamp.appendChild(nodeTimestamp);	
+	
+	divToastHeader.appendChild(smallTimestamp);
+	
+	// <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+	
+	const buttonToast = document.createElement("button");
+	buttonToast.classList.add("btn-close");
+	buttonToast.setAttribute("type", "button");
+	buttonToast.setAttribute("data-bs-dismiss", "toast");
+	buttonToast.setAttribute("aria-label", "Close");	
+	
+	divToastHeader.appendChild(buttonToast);
+	
+	// <div class="toast-body">See? Just like this.</div>
+	
+	const divToastBody = document.createElement("div");
+	divToastBody.classList.add("toast-body");
+	const txtDebugMsg = document.createTextNode(debugMessage);
+	divToastBody.appendChild(txtDebugMsg);	
+	
+	// add toast to toast-container
+	
+	toastContainer.appendChild(divToast);
+	divToast.appendChild(divToastHeader);
+	divToast.appendChild(divToastBody);
+	
+	// trigger display via bootstrap
+	
+	const toastLiveExample = document.getElementById(idTimestamp);
+	
+	//if (toastTrigger) {
+		const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample)
+		//toastTrigger.addEventListener('click', () => {toastBootstrap.show()})
+		toastBootstrap.show();
+	//}
 }
 
 function clearDebug() {
