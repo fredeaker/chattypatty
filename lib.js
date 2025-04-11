@@ -171,18 +171,16 @@ function addDebug(toastContainer, debugMessage) {
 	
 	const divToast = document.createElement("div");
 	divToast.setAttribute("id", idTimestamp);
-	divToast.setAttribute("class", "toast");
+	divToast.setAttribute("class", "toast bg-warning-subtle");
 	divToast.setAttribute("role", "alert");
 	divToast.setAttribute("aria-live", "assertive");
 	divToast.setAttribute("aria-atomic", "true");
+	divToast.setAttribute("data-bs-autohide", "false");
 	
 	// <div class="toast-header">
 	
 	const divToastHeader = document.createElement("div");
 	divToastHeader.classList.add("toast-header");
-	
-	// <img src="..." class="rounded me-2" alt="...">
-	// skip for now
 	
 	// <strong class="me-auto">chattypatty</strong>
 	
