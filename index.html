@@ -2,14 +2,15 @@
 <html lang="en">
 
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>chattypatty - By Fred Eaker</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>chattypatty - By Fred Eaker</title>
 
-<!-- bootrap css -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
+    <!-- bootrap css -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
 
-<!-- meta 
+    <!-- meta 
 <meta name="description" content="">
 <meta property="og:title" content="">
 <meta property="og:type" content="">
@@ -17,12 +18,12 @@
 <meta property="og:image" content="">
 <meta property="og:image:alt" content="">
 -->
-<!-- icons 
+    <!-- icons 
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.png">
 -->
-<!-- etc
+    <!-- etc
 <link rel="manifest" href="site.webmanifest">
 <meta name="theme-color" content="#fafafa">
  -->
@@ -33,7 +34,9 @@
         <div class="row">
             <div class="col-10">
                 <h1 class="display-3 text-primary">chattypatty</h1>
-                <p class="small">A basic implementation of the ChatGPT responses API, created by <a href='https://fredeaker.com/'>Fred Eaker</a> [<a href='https://github.com/fredeaker/chattypatty'>src</a>].</p>
+                <p class="small">A basic implementation of the ChatGPT responses API, created by <a
+                        href='https://fredeaker.com/'>Fred Eaker</a> [<a
+                        href='https://github.com/fredeaker/chattypatty'>src</a>].</p>
             </div>
             <div class="col-2 small">
                 <label for="apikey" class="form-label">Enter your API key</label>
@@ -44,58 +47,61 @@
                 </select>
             </div>
         </div>
-    
-    <div class="row">
-        <div class="col">
-            <label for="prompt" class="form-label form-control-lg"><b>Prompt</b></label>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <textarea class="form-control" id="prompt" rows="10"></textarea>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <div class="d-grid gap-2">
-                <button type="submit" class="btn btn-primary" onclick="submitPrompt()" id="submit">Submit</button>
-                <button id="progress-bar" class="btn btn-info" type="button" disabled style="display:none">
-                    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
-                    <span role="status">Inhale calmness, exhale stress while we process your request.</span>
-                </button>
+
+        <div class="row">
+            <div class="col">
+                <label for="prompt" class="form-label form-control-lg"><b>Prompt</b></label>
             </div>
         </div>
-    </div>
-
-
-    <div class="row">
-        <div class="col">
-            <label for="response" class="form-label form-control-lg"><b>Response</b></label>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <div id="response" class="text-bg-light p-3 border border-1"></div>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col">
-            <div class="d-grid gap-2">
-                <button class="btn btn-primary" id="copy" onclick="copyResponse()">Copy</button>
+        <div class="row">
+            <div class="col">
+                <textarea class="form-control" id="prompt" rows="10"></textarea>
             </div>
         </div>
-    </div>
+        <div class="row">
+            <div class="col">
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-primary" onclick="submitPrompt()" id="submit">Submit</button>
+                    <button id="progress-bar" class="btn btn-info" type="button" disabled style="display:none">
+                        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                        <span role="status">Inhale calmness, exhale stress while we process your request.</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col">
+                <label for="response" class="form-label form-control-lg"><b>Response</b></label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div id="response" class="text-bg-light p-3 border border-1"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary" id="copy" onclick="copyResponse()">Copy</button>
+                </div>
+            </div>
+        </div>
 
     </div> <!-- end bootstrap container -->
 
     <!-- boostrap javascript -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+        crossorigin="anonymous"></script>
     <!-- DOMPurify sanitizer and validator https://github.com/cure53/DOMPurify -->
-	<script type="text/javascript" src="js/purify.min.js"></script>
+    <script type="text/javascript" src="js/purify.min.js"></script>
     <!-- javascript Markdown parser (https://github.com/markedjs/marked)  -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <!-- custom javascript -->
     <script src="js/app.js"></script>
 
 </body>
+
 </html>
