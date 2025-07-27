@@ -123,29 +123,39 @@ class Controller {
 
 		this.content = this.response.output[0].content[0].text;
 		this.view.response.insertAdjacentHTML("afterbegin", marked.parse(this.content));
-
-		// parse Markdown response to HTML
-		//this.view.response.insertAdjacentHTML("afterbegin", marked.parse(this.content));
-		//this.view.response.innerHTML("afterbegin", marked.parse(this.content));
-
-		// parse Markdown response to HTML
-		//this.view.response.insertAdjacentHTML("afterbegin", marked.parse(this.oai_content));
-
-		//console.log("this.response:\n" + JSON.stringify(this.response)); // debug
-		//console.log("this.oai_content:\n" + this.oai_content); // debug
 	}
 }
 
 function copyResponse() {
-	// Get the text field
-	this.response = document.getElementById("response");
+	// Get the text field as rich text and plain text
+	this.textContent = document.getElementById("response").innerText
+	this.htmlContent = document.getElementById("response").innerHTML;
+
+	this.clipboardItem = new ClipboardItem({
+		"text/html": new Blob([this.htmlContent], { type: "text/html" }),
+		"text/plain": new Blob([this.textContent], { type: "text/plain" }) // Optional: plain text fallback
+	});
+
+	// update copy button to provide indication that content has been copied
+
 	this.copy = document.getElementById("copy");
 
-	navigator.clipboard.writeText(this.response.innerText);
-	this.copy.innerHTML = "Copied!"
-	this.copy.disabled = true;
-	const fiveSecondTimer = setTimeout(function () {
-		this.copy.innerHTML = "Copy";
-		this.copy.disabled = false;
-	}, 2000);
+	navigator.clipboard.write([clipboardItem])
+		.then(() => {
+			this.copy.innerHTML = "Copied!"
+			this.copy.disabled = true;
+			const fiveSecondTimer = setTimeout(function () {
+				this.copy.innerHTML = "Copy";
+				this.copy.disabled = false;
+			}, 2000); // 2,000 ms = 2 seconds
+		})
+		.catch(err => {
+			this.copy.innerHTML = err;
+			this.copy.disabled = true;
+			const fiveSecondTimer = setTimeout(function () {
+				this.copy.innerHTML = err;
+				this.copy.disabled = false;
+			}, 2000); // 2,000 ms = 2 seconds
+			console.error("Failed to copy rich text:", err);
+		});
 }
