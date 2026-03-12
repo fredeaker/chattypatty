@@ -75,53 +75,72 @@ class Controller {
 		this.view.prompt.disabled = true;
 		this.view.response.innerHTML = "";
 
-		this.response =
-			await fetch(this.endpoint, { // begin fetch
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					'Authorization': "Bearer " + this.view.apikey
-				},
-				body: JSON.stringify({
-					'model': this.view.model,
-					"input": this.view.prompt_value
-					/*
-					'messages': [
-						{
-							"role":"developer",
-							"content": [
-								{
-									"type": "text",
-									"text": this.view.persona_select_value
-								}]
-						},
-						{
-							"role": "user",
-							"content": [
-								{
-									"type": "text",
-									"text": this.view.oai_api_prompt_value
-								}
-							]
-						}
-					]
-					*/
-				})
-			}); // end fetch
+		let httpResponse;
+		try {
+			httpResponse =
+				await fetch(this.endpoint, { // begin fetch
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json',
+						'Authorization': "Bearer " + this.view.apikey
+					},
+					body: JSON.stringify({
+						'model': this.view.model,
+						"input": this.view.prompt_value
+						/*
+						'messages': [
+							{
+								"role":"developer",
+								"content": [
+									{
+										"type": "text",
+										"text": this.view.persona_select_value
+									}]
+							},
+							{
+								"role": "user",
+								"content": [
+									{
+										"type": "text",
+										"text": this.view.oai_api_prompt_value
+									}
+								]
+							}
+						]
+						*/
+					})
+				}); // end fetch
+		} catch (err) {
+			this.view.progress_bar.style.display = 'none';
+			this.view.submit.style.display = 'block';
+			this.view.submit.disabled = false;
+			this.view.prompt.disabled = false;
+			this.view.response.innerHTML = "Network error: " + err.message;
+			return;
+		}
 
 		this.view.progress_bar.style.display = 'none';
 		this.view.submit.style.display = 'block';
-		this.view.copy.style.display = 'block';
 		this.view.submit.disabled = false;
 		this.view.prompt.disabled = false;
 
-		this.response = await this.response.json();
+		const data = await httpResponse.json();
 
-		console.log("response:"); // debug
-		console.log(this.response); // debug
-		console.log(this.response.output[0].content[0].text); // debug
+		console.log("response:", data); // debug
 
-		this.content = this.response.output[0].content[0].text;
+		if (!httpResponse.ok) {
+			const errorMsg = (data.error && data.error.message) ? data.error.message : "HTTP " + httpResponse.status;
+			this.view.response.innerHTML = "Error " + httpResponse.status + ": " + errorMsg;
+			return;
+		}
+
+		// output may contain tool call items before the message; find the first message item
+		const messageItem = data.output.find(item => item.type === "message");
+		this.content = messageItem.content[0].text;
+
+		console.log("content:", this.content); // debug
+
+		this.view.copy.style.display = 'block';
 		this.view.response.insertAdjacentHTML("afterbegin", marked.parse(this.content));
 	}
 }

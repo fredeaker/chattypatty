@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:developers.openai.com)",
+      "WebFetch(domain:platform.openai.com)",
+      "WebFetch(domain:openai.com)",
+      "WebSearch",
+      "WebFetch(domain:www.datacamp.com)",
+      "WebFetch(domain:medium.com)",
+      "WebFetch(domain:cookbook.openai.com)"
+    ]
+  }
+}
