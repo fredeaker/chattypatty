@@ -4,13 +4,13 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>chattypatty - By Fred Eaker</title>
+    <title>chattypatty</title>
 
-    <!-- bootrap css -->
+    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-LN+7fdVzj6u52u30Kp6M/trliBMCMKTyK833zpbD+pXdCLuTusPj697FH4R/5mcr" crossorigin="anonymous">
 
-    <!-- meta 
+    <!-- meta
 <meta name="description" content="">
 <meta property="og:title" content="">
 <meta property="og:type" content="">
@@ -18,7 +18,7 @@
 <meta property="og:image" content="">
 <meta property="og:image:alt" content="">
 -->
-    <!-- icons 
+    <!-- icons
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" href="/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icon.png">
@@ -26,80 +26,189 @@
     <!-- etc
 <link rel="manifest" href="site.webmanifest">
 <meta name="theme-color" content="#fafafa">
- -->
+-->
+
+    <style>
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+        #chat-area {
+            flex: 1;
+            overflow-y: auto;
+        }
+        .message {
+            max-width: 75%;
+        }
+        .message-user {
+            margin-left: auto;
+        }
+        .message-label {
+            font-size: 0.7rem;
+            color: #6c757d;
+            margin-bottom: 0.2rem;
+        }
+        .message-user .message-label {
+            text-align: right;
+        }
+        .message-user .bubble {
+            background-color: #0d6efd;
+            color: #fff;
+            border-radius: 1rem 1rem 0.25rem 1rem;
+            padding: 0.75rem 1rem;
+            white-space: pre-wrap;
+        }
+        .message-assistant .bubble {
+            background-color: #f1f3f5;
+            border-radius: 1rem 1rem 1rem 0.25rem;
+            padding: 0.75rem 1rem;
+        }
+        .message-assistant .bubble > *:last-child {
+            margin-bottom: 0;
+        }
+        .message-assistant .bubble pre {
+            background: #e9ecef;
+            border-radius: 0.4rem;
+            padding: 0.75rem;
+        }
+        .message-error .bubble {
+            background-color: #f8d7da;
+            color: #842029;
+            border-radius: 1rem;
+            padding: 0.75rem 1rem;
+        }
+        .streaming-cursor::after {
+            content: '▋';
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0; }
+        }
+        #prompt {
+            resize: none;
+        }
+    </style>
 </head>
 
 <body>
-    <div class="container"> <!-- bootstrap container -->
-        <div class="row">
-            <div class="col-10">
-                <h1 class="display-3 text-primary">chattypatty</h1>
-                <p class="small">A basic implementation of the ChatGPT responses API, created by <a
-                        href='https://fredeaker.com/'>Fred Eaker</a> [<a
-                        href='https://github.com/fredeaker/chattypatty'>src</a>].</p>
-            </div>
-            <div class="col-2 small">
-                <label for="apikey" class="form-label">Enter your API key</label>
-                <input type="password" class="form-control form-control-sm" id="apikey"></input>
-                <label for="model" class="form-label">Select model</label>
-                <select class="form-control form-control-sm" aria-label="Select model" id="model">
-                    <option selected value="gpt-5.4">gpt-5.4</option>
-                </select>
-            </div>
-        </div>
 
-        <div class="row">
-            <div class="col">
-                <label for="prompt" class="form-label form-control-lg"><b>Prompt</b></label>
-            </div>
+    <!-- Navbar -->
+    <nav class="navbar bg-primary px-3 py-2 d-flex justify-content-between">
+        <div>
+            <span class="text-white fw-bold fs-5">chattypatty</span>
+            <span class="text-white-50 small ms-2">by
+                <a href="https://fredeaker.com/" class="text-white-50">Fred Eaker</a>
+                [<a href="https://github.com/fredeaker/chattypatty" class="text-white-50">src</a>]
+            </span>
         </div>
-        <div class="row">
-            <div class="col">
-                <textarea class="form-control text-bg-light p-3 border border-1" id="prompt" rows="10"></textarea>
+        <button class="btn btn-outline-light btn-sm" data-bs-toggle="collapse" data-bs-target="#settings-panel"
+            aria-expanded="false" aria-controls="settings-panel">
+            Settings
+        </button>
+    </nav>
+
+    <!-- Settings panel -->
+    <div class="collapse border-bottom bg-light" id="settings-panel">
+        <div class="container-fluid py-2 small">
+            <div class="row g-2 align-items-end">
+                <div class="col-auto" id="apikey-entry">
+                    <label for="apikey" class="form-label mb-1">API key</label>
+                    <div class="input-group input-group-sm">
+                        <input type="password" class="form-control form-control-sm" id="apikey"
+                            onkeydown="if(event.key==='Enter')saveApiKey()">
+                        <button class="btn btn-primary btn-sm" onclick="saveApiKey()">Save</button>
+                    </div>
+                </div>
+                <div class="col-auto align-self-end" id="apikey-set" style="display:none">
+                    <span class="text-success small">API key set</span>
+                    <a href="#" class="small ms-2" onclick="changeApiKey(event)">Change</a>
+                </div>
+                <div class="col-auto">
+                    <label for="model" class="form-label mb-1">Model</label>
+                    <select class="form-select form-select-sm" id="model">
+                        <option selected value="gpt-5.4">gpt-5.4</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <div class="form-check mb-1">
+                        <input class="form-check-input" type="checkbox" id="conversation-mode"
+                            onchange="toggleConversationMode(this)" checked>
+                        <label class="form-check-label" for="conversation-mode">Conversation mode</label>
+                    </div>
+                </div>
+                <div class="col-auto">
+                    <a class="small" data-bs-toggle="collapse" href="#advanced-params" role="button">
+                        Change default parameters
+                    </a>
+                </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col">
-                <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-primary" onclick="submitPrompt()" id="submit">Submit</button>
-                    <button id="progress-bar" class="btn btn-info" type="button" disabled style="display:none">
-                        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
-                        <span role="status">Inhale calmness, exhale stress while we process your request.</span>
-                    </button>
+            <div class="collapse" id="advanced-params">
+                <div class="row g-3 mt-1 align-items-end">
+                    <div class="col">
+                        <label for="instructions" class="form-label mb-1">Instructions</label>
+                        <input type="text" class="form-control form-control-sm" id="instructions"
+                            placeholder="Optional system instructions">
+                    </div>
+                    <div class="col-auto" style="min-width:160px">
+                        <label for="temperature" class="form-label mb-1">Temperature:
+                            <span id="temperature-display">1</span></label>
+                        <input type="range" class="form-range" id="temperature" min="0" max="2" step="0.1" value="1"
+                            oninput="document.getElementById('temperature-display').textContent = this.value">
+                    </div>
+                    <div class="col-auto" style="min-width:140px">
+                        <label for="top_p" class="form-label mb-1">Top P:
+                            <span id="top-p-display">1</span></label>
+                        <input type="range" class="form-range" id="top_p" min="0" max="1" step="0.01" value="1"
+                            oninput="document.getElementById('top-p-display').textContent = this.value">
+                    </div>
+                    <div class="col-auto">
+                        <label for="max_output_tokens" class="form-label mb-1">Max tokens</label>
+                        <input type="number" class="form-control form-control-sm" id="max_output_tokens"
+                            min="1" placeholder="default" style="width:100px">
+                    </div>
                 </div>
             </div>
         </div>
+    </div>
 
+    <!-- Chat area -->
+    <div id="chat-area" class="p-3">
+        <div id="response"></div>
+    </div>
 
-        <div class="row">
-            <div class="col">
-                <label for="response" class="form-label form-control-lg"><b>Response</b></label>
-            </div>
+    <!-- Input area -->
+    <div class="border-top p-3 bg-white">
+        <div class="input-group">
+            <textarea class="form-control" id="prompt" rows="2"
+                placeholder="Type a message… (Enter to send, Shift+Enter for new line)"
+                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();submitPrompt();}"></textarea>
+            <button class="btn btn-primary" id="submit" onclick="submitPrompt()">Send</button>
         </div>
-        <div class="row">
-            <div class="col">
-                <div class="d-grid gap-2">
-                    <button class="btn btn-primary" id="copy" onclick="copyResponse()">Copy</button>
-                </div>
-            </div>
+        <div class="d-flex gap-2 mt-2">
+            <button id="progress-bar" class="btn btn-info btn-sm flex-grow-1" type="button" disabled
+                style="display:none">
+                <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                <span role="status">Processing…</span>
+            </button>
+            <button class="btn btn-outline-secondary btn-sm" id="new-conversation" onclick="newConversation()"
+                style="display:none">New conversation</button>
         </div>
-        <div class="row">
-            <div class="col">
-                <div id="response" class="form-control text-bg-light p-3 border border-1"></div>
-            </div>
-        </div>
+    </div>
 
-    </div> <!-- end bootstrap container -->
-
-    <!-- boostrap javascript -->
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
         crossorigin="anonymous"></script>
-    <!-- DOMPurify sanitizer and validator https://github.com/cure53/DOMPurify -->
+    <!-- DOMPurify sanitizer https://github.com/cure53/DOMPurify -->
     <script type="text/javascript" src="js/purify.min.js"></script>
-    <!-- javascript Markdown parser (https://github.com/markedjs/marked)  -->
+    <!-- Markdown parser https://github.com/markedjs/marked -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <!-- custom javascript -->
+    <!-- App logic -->
     <script src="js/app.js"></script>
 
 </body>

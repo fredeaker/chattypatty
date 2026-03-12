@@ -1,3 +1,118 @@
+let conversationId = null;
+
+function saveApiKey() {
+	const key = document.getElementById('apikey').value.trim();
+	if (!key) return;
+	localStorage.setItem('chattypatty_apikey', key);
+	document.getElementById('apikey-entry').style.display = 'none';
+	document.getElementById('apikey-set').style.display = 'block';
+	bootstrap.Collapse.getOrCreateInstance(document.getElementById('settings-panel')).hide();
+}
+
+function changeApiKey(e) {
+	e.preventDefault();
+	document.getElementById('apikey-set').style.display = 'none';
+	document.getElementById('apikey-entry').style.display = 'block';
+	document.getElementById('apikey').focus();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+	const savedKey = localStorage.getItem('chattypatty_apikey');
+	if (savedKey) {
+		document.getElementById('apikey').value = savedKey;
+		document.getElementById('apikey-entry').style.display = 'none';
+		document.getElementById('apikey-set').style.display = 'block';
+	} else {
+		document.getElementById('settings-panel').classList.add('show');
+	}
+	appendMessage('assistant', "Let's talk!");
+});
+
+function appendMessage(role, content, isHtml = false) {
+	const responseDiv = document.getElementById('response');
+	const msg = document.createElement('div');
+	msg.className = `message message-${role} mb-3`;
+	const label = document.createElement('div');
+	label.className = 'message-label';
+	label.textContent = role === 'user' ? 'You' : role === 'assistant' ? 'chattypatty' : '';
+	const bubble = document.createElement('div');
+	bubble.className = 'bubble';
+	if (isHtml) {
+		bubble.innerHTML = content;
+	} else {
+		bubble.textContent = content;
+	}
+	msg.appendChild(label);
+	msg.appendChild(bubble);
+	responseDiv.appendChild(msg);
+	if (role === 'assistant') addCopyButton(bubble);
+	scrollChatToBottom();
+}
+
+function addCopyButton(bubble) {
+	const btn = document.createElement('button');
+	btn.className = 'btn btn-link btn-sm text-muted p-0 mt-1';
+	btn.textContent = 'Copy';
+	btn.onclick = () => {
+		const item = new ClipboardItem({
+			"text/html": new Blob([bubble.innerHTML], { type: "text/html" }),
+			"text/plain": new Blob([bubble.innerText], { type: "text/plain" })
+		});
+		navigator.clipboard.write([item])
+			.then(() => {
+				btn.textContent = 'Copied!';
+				setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+			})
+			.catch(() => {
+				btn.textContent = 'Failed';
+				setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+			});
+	};
+	bubble.parentElement.appendChild(btn);
+}
+
+function scrollChatToBottom() {
+	const chatArea = document.getElementById('chat-area');
+	chatArea.scrollTop = chatArea.scrollHeight;
+}
+
+function appendStreamingMessage() {
+	const responseDiv = document.getElementById('response');
+	const msg = document.createElement('div');
+	msg.className = 'message message-assistant mb-3';
+	const label = document.createElement('div');
+	label.className = 'message-label';
+	label.textContent = 'chattypatty';
+	const bubble = document.createElement('div');
+	bubble.className = 'bubble streaming-cursor';
+	msg.appendChild(label);
+	msg.appendChild(bubble);
+	responseDiv.appendChild(msg);
+	scrollChatToBottom();
+	return bubble;
+}
+
+function toggleConversationMode(checkbox) {
+	if (checkbox.checked) {
+		document.getElementById('response').innerHTML = '';
+		appendMessage('assistant', "Let's talk!");
+		document.getElementById('copy').style.display = 'none';
+	} else {
+		conversationId = null;
+		document.getElementById('response').innerHTML = '';
+		document.getElementById('new-conversation').style.display = 'none';
+		document.getElementById('copy').style.display = 'none';
+	}
+}
+
+function newConversation() {
+	conversationId = null;
+	document.getElementById('response').innerHTML = '';
+	appendMessage('assistant', "Let's talk!");
+	document.getElementById('copy').style.display = 'none';
+	document.getElementById('new-conversation').style.display = 'none';
+}
+
 function submitPrompt() {
 	//console.log("submitPrompt()"); // debug
 	const v = new Form(); // i.e., view
@@ -19,22 +134,23 @@ class Form { // view
 
 		//console.log("model: " + this.model); // debug
 
+		this.conversation_mode = document.getElementById("conversation-mode").checked;
+		this.instructions = DOMPurify.sanitize(document.getElementById("instructions").value);
+		this.temperature = parseFloat(document.getElementById("temperature").value);
+		this.top_p = parseFloat(document.getElementById("top_p").value);
+		const max_tokens_raw = document.getElementById("max_output_tokens").value;
+		this.max_output_tokens = max_tokens_raw ? parseInt(max_tokens_raw) : null;
+
 		this.prompt = document.getElementById("prompt");
 		this.prompt_value = DOMPurify.sanitize(this.prompt.value);
 
 		//console.log("prompt_value: " + this.prompt_value); // debug
 
-		// get other DOM elements in the page for updating 
+		// get other DOM elements in the page for updating
 
 		this.submit = document.getElementById("submit");
 		this.progress_bar = document.getElementById('progress-bar');
-		this.copy = document.getElementById("copy");
 		this.response = document.getElementById("response");
-
-		// since user is entering a new prompt:
-		// hide the copy button
-
-		this.copy.style.display = 'none';
 
 		// form_ok supports form error checking
 
@@ -44,17 +160,17 @@ class Form { // view
 		DOMPurify.sanitize();
 
 		if (!this.apikey) { // no api key
-			this.form_errors.push("Form error: API key is missing!\n");
+			this.form_errors.push("Form error: API key is missing!");
 			this.form_ok = false;
 		}
 
 		if (!this.model) { // no model
-			this.form_errors.push("Form error: No model selected!\n");
+			this.form_errors.push("Form error: No model selected!");
 			this.form_ok = false;
 		}
 
 		if (!this.prompt_value) { // no prompt
-			this.form_errors.push("Form error: No prompt!\n");
+			this.form_errors.push("Form error: No prompt!");
 			this.form_ok = false;
 		}
 	}
@@ -65,7 +181,7 @@ class Controller {
 		this.view = view;
 		this.endpoint = "https://api.openai.com/v1/responses";
 		if (this.view.form_ok) { this.getResponse(); }
-		else { this.view.response.innerHTML = this.view.form_errors }
+		else { appendMessage('error', this.view.form_errors.join(' ')); }
 	}
 
 	async getResponse() {
@@ -73,7 +189,14 @@ class Controller {
 		this.view.submit.style.display = "none";
 		this.view.submit.disabled = true;
 		this.view.prompt.disabled = true;
-		this.view.response.innerHTML = "";
+
+		if (!this.view.conversation_mode) {
+			this.view.response.innerHTML = "";
+		}
+
+		// show user message immediately and clear the input
+		appendMessage('user', this.view.prompt_value);
+		this.view.prompt.value = '';
 
 		let httpResponse;
 		try {
@@ -86,7 +209,13 @@ class Controller {
 					},
 					body: JSON.stringify({
 						'model': this.view.model,
-						"input": this.view.prompt_value
+						"input": this.view.prompt_value,
+						"stream": true,
+						...(this.view.instructions && { "instructions": this.view.instructions }),
+						"temperature": this.view.temperature,
+						"top_p": this.view.top_p,
+						...(this.view.max_output_tokens && { "max_output_tokens": this.view.max_output_tokens }),
+						...(this.view.conversation_mode && conversationId && { "previous_response_id": conversationId })
 						/*
 						'messages': [
 							{
@@ -115,66 +244,71 @@ class Controller {
 			this.view.submit.style.display = 'block';
 			this.view.submit.disabled = false;
 			this.view.prompt.disabled = false;
-			this.view.response.innerHTML = "Network error: " + err.message;
+			appendMessage('error', "Network error: " + err.message);
 			return;
 		}
 
-		this.view.progress_bar.style.display = 'none';
-		this.view.submit.style.display = 'block';
-		this.view.submit.disabled = false;
-		this.view.prompt.disabled = false;
-
-		const data = await httpResponse.json();
-
-		console.log("response:", data); // debug
-
+		// HTTP errors return a JSON body, not a stream
 		if (!httpResponse.ok) {
+			this.view.progress_bar.style.display = 'none';
+			this.view.submit.style.display = 'block';
+			this.view.submit.disabled = false;
+			this.view.prompt.disabled = false;
+			const data = await httpResponse.json();
 			const errorMsg = (data.error && data.error.message) ? data.error.message : "HTTP " + httpResponse.status;
-			this.view.response.innerHTML = "Error " + httpResponse.status + ": " + errorMsg;
+			appendMessage('error', "Error " + httpResponse.status + ": " + errorMsg);
 			return;
 		}
 
-		// output may contain tool call items before the message; find the first message item
-		const messageItem = data.output.find(item => item.type === "message");
-		this.content = messageItem.content[0].text;
+		// Create the assistant bubble and start streaming into it
+		const bubble = appendStreamingMessage();
+		this.view.progress_bar.style.display = 'none';
 
-		console.log("content:", this.content); // debug
+		const reader = httpResponse.body.getReader();
+		const decoder = new TextDecoder();
+		let buffer = '';
+		let fullText = '';
 
-		this.view.copy.style.display = 'block';
-		this.view.response.insertAdjacentHTML("afterbegin", marked.parse(this.content));
+		try {
+			while (true) {
+				const { done, value } = await reader.read();
+				if (done) break;
+				buffer += decoder.decode(value, { stream: true });
+
+				// process all complete SSE lines
+				const lines = buffer.split('\n');
+				buffer = lines.pop(); // retain any incomplete trailing line
+
+				for (const line of lines) {
+					if (!line.startsWith('data: ')) continue;
+					const jsonStr = line.slice(6).trim();
+					if (!jsonStr || jsonStr === '[DONE]') continue;
+					let event;
+					try { event = JSON.parse(jsonStr); } catch (e) { continue; }
+
+					if (event.type === 'response.output_text.delta') {
+						fullText += event.delta;
+						bubble.appendChild(document.createTextNode(event.delta));
+						scrollChatToBottom();
+					} else if (event.type === 'response.completed') {
+						if (this.view.conversation_mode) {
+							conversationId = event.response.id;
+							document.getElementById('new-conversation').style.display = 'block';
+						}
+					}
+				}
+			}
+		} finally {
+			this.view.submit.style.display = 'block';
+			this.view.submit.disabled = false;
+			this.view.prompt.disabled = false;
+		}
+
+		// Replace streamed plain text with rendered markdown
+		bubble.classList.remove('streaming-cursor');
+		bubble.innerHTML = marked.parse(fullText);
+		addCopyButton(bubble);
+		scrollChatToBottom();
 	}
 }
 
-function copyResponse() {
-	// Get the text field as rich text and plain text
-	this.textContent = document.getElementById("response").innerText
-	this.htmlContent = document.getElementById("response").innerHTML;
-
-	this.clipboardItem = new ClipboardItem({
-		"text/html": new Blob([this.htmlContent], { type: "text/html" }),
-		"text/plain": new Blob([this.textContent], { type: "text/plain" }) // Optional: plain text fallback
-	});
-
-	// update copy button to provide indication that content has been copied
-
-	this.copy = document.getElementById("copy");
-
-	navigator.clipboard.write([clipboardItem])
-		.then(() => {
-			this.copy.innerHTML = "Copied!"
-			this.copy.disabled = true;
-			const fiveSecondTimer = setTimeout(function () {
-				this.copy.innerHTML = "Copy";
-				this.copy.disabled = false;
-			}, 2000); // 2,000 ms = 2 seconds
-		})
-		.catch(err => {
-			this.copy.innerHTML = err;
-			this.copy.disabled = true;
-			const fiveSecondTimer = setTimeout(function () {
-				this.copy.innerHTML = err;
-				this.copy.disabled = false;
-			}, 2000); // 2,000 ms = 2 seconds
-			console.error("Failed to copy rich text:", err);
-		});
-}
